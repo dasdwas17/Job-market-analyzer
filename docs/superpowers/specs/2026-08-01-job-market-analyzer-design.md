@@ -62,7 +62,7 @@ class JobItem(BaseModel):
     salary_months: int | None = None   # 年薪月数（14薪=14）
     experience: str = ""               # 经验要求
     education: str = ""                # 学历要求
-    skill_tags: list[str] = []         # 技能标签（短文本）
+    skill_tags: list[str] = Field(default_factory=list)  # 技能标签（短文本）
     job_description: str = ""          # 岗位描述（长文本，用于匹配诊断）
     job_url: str = ""                  # 岗位链接
     crawl_time: str = ""               # 数据采集时间
@@ -115,7 +115,7 @@ class ActionItem(BaseModel):
 
 ## 4. 模块设计
 
-### 4.1 数据接入层 (`src/io/`)
+### 4.1 数据接入层 (`job_market_analyzer/io/`)
 
 #### BaseAdapter
 
@@ -163,28 +163,25 @@ def fetch_jobs(
 
 支持 CSV/JSON/SQLite 三种格式导入，导入时通过 JobItem validator 自动解析薪资字符串。
 
-### 4.2 工具层 (`src/utils/`)
+### 4.2 工具层 (`job_market_analyzer/utils/`)
 
 | 文件 | 职责 | 核心函数 |
 |------|------|---------|
 | `salary_parser.py` | 薪资字符串解析 | `parse_salary_string("15-25K·14薪")` → `SalaryParsed(min=15, max=25, median=20, months=14)` |
-| `text_processor.py` | 文本预处理 | `tokenize()` jieba分词、`compute_tfidf()` TF-IDF 向量化 |
+| `text_processor.py` | 文本预处理 | `tokenize()` 关键词匹配、`compute_tfidf_similarity()` TF-IDF 余弦相似度 |
 | `stat_helper.py` | 统计工具 | `normalize()`、`bin_values()`、`safe_percentile()` |
 
-### 4.3 分析模块 (`src/analyzer/`)
+### 4.3 分析模块 (`job_market_analyzer/analyzer/`)
 
 #### salary_analyzer.py
 - 薪资分布直方图（按 config.yaml 的 bins 分箱）
-- 城市薪资对比（箱线图）
+- 城市薪资对比
 - 经验-薪资曲线
 - 学历-薪资对比
-- 行业薪资排行
 
 #### skill_analyzer.py
 - 高频技能统计（低于 min_frequency 不展示）
 - 技能-薪资关联分析（有该技能 vs 无该技能的薪资差异）
-- 技能组合价值分析
-- 技能词云
 
 #### competitive_analyzer.py
 
@@ -222,7 +219,7 @@ def fetch_jobs(
 **算法**: TF-IDF 相似度 + 技能关键词匹配  
 **输出**: 匹配度评分 (0-100) + 匹配/缺失技能列表
 
-### 4.4 可视化模块 (`src/visualizer/dashboard.py`)
+### 4.4 可视化模块 (`job_market_analyzer/visualizer/dashboard.py`)
 
 - 每个分析模块独立生成一个 HTML（salary.html、skill.html、competitive.html、strategy.html）
 - `generate_index_page()` 生成汇总索引页 `index.html`
@@ -264,8 +261,7 @@ visualization:
   theme: "plotly_white"
   color_scale: "Viridis"
   chart_width: 1200
-  output_dir: "output/reports"
-  filename: "dashboard_{timestamp}.html"
+  output_dir: "output/reports"  # 固定输出 index.html 及各模块子页（salary/skill/competitive/strategy.html）
 
 resume:
   user_skills: []
@@ -285,7 +281,7 @@ resume:
 | CLI 参数 | `--skills "Python,SQL" --city "成都" --experience "3-5年" --salary "18-25K"` | 临时指定 |
 | 交互式引导 | `python run_analysis.py --interactive` | 首次使用 |
 
-交互式引导完成后自动写入 config.yaml，下次无需重复输入。
+> 注：交互式输入仅本次运行有效，不自动写入 config.yaml。如需持久化请手动填写 config.yaml 的 `resume` 字段或使用 CLI 参数。
 
 **无画像时降级**: 跳过 strategy_advisor 和 resume_matcher，仅运行薪资/技能/竞争度分析，输出 3 模块报告并提示用户配置画像。
 
@@ -310,7 +306,6 @@ dependencies = [
     "numpy>=1.24",
     "plotly>=5.18",
     "scikit-learn>=1.3",
-    "jieba>=0.42",
 ]
 
 [project.optional-dependencies]
@@ -328,7 +323,7 @@ job_market_analyzer/
 ├── data/
 │   ├── demo/                  # 预制 CSV 演示数据
 │   └── sample/                # 用户放自己的 CSV
-├── src/
+├── job_market_analyzer/
 │   ├── schema.py              # JobItem + StrategyReport 等数据模型
 │   ├── config.py              # 配置加载器（CLI > yaml > 默认值）
 │   ├── io/

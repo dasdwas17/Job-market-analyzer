@@ -6,7 +6,7 @@
 
 **Architecture:** Adapter pattern for data ingestion (BaseAdapter + DemoAdapter), Pydantic schemas for type-safe data contracts, modular analyzers feeding into a Plotly dashboard generator with an index page.
 
-**Tech Stack:** Python 3.11+, Pydantic 2.0, PyYAML, pandas, numpy, Plotly, scikit-learn, jieba
+**Tech Stack:** Python 3.11+, Pydantic 2.0, PyYAML, pandas, numpy, Plotly, scikit-learn
 
 **Spec:** `docs/superpowers/specs/2026-08-01-job-market-analyzer-design.md`
 
@@ -18,25 +18,25 @@
 |------|----------------|
 | `pyproject.toml` | Project metadata + dependencies |
 | `config.yaml` | Default configuration (all values optional) |
-| `src/__init__.py` | Package init |
-| `src/schema.py` | JobItem, StrategyReport, JobMatch, SkillGap, ActionItem, SalaryParsed |
-| `src/config.py` | Config loader (CLI > yaml > defaults) |
-| `src/utils/__init__.py` | Package init |
-| `src/utils/salary_parser.py` | parse_salary_string() → SalaryParsed |
-| `src/utils/text_processor.py` | tokenize(), compute_tfidf() |
-| `src/utils/stat_helper.py` | normalize(), bin_values(), safe_percentile() |
-| `src/io/__init__.py` | Package init |
-| `src/io/base_adapter.py` | BaseAdapter abstract class |
-| `src/io/demo_adapter.py` | DemoAdapter with statistical data generation |
-| `src/io/importer.py` | CSV/JSON/SQLite importer |
-| `src/analyzer/__init__.py` | Package init |
-| `src/analyzer/salary_analyzer.py` | Salary distribution analysis |
-| `src/analyzer/skill_analyzer.py` | Skill frequency + salary correlation |
-| `src/analyzer/competitive_analyzer.py` | Competitive index calculation |
-| `src/analyzer/strategy_advisor.py` | Job matching + action items |
-| `src/analyzer/resume_matcher.py` | TF-IDF resume-job matching |
-| `src/visualizer/__init__.py` | Package init |
-| `src/visualizer/dashboard.py` | Plotly HTML dashboard + index page |
+| `job_market_analyzer/__init__.py` | Package init |
+| `job_market_analyzer/schema.py` | JobItem, StrategyReport, JobMatch, SkillGap, ActionItem, SalaryParsed |
+| `job_market_analyzer/config.py` | Config loader (CLI > yaml > defaults) |
+| `job_market_analyzer/utils/__init__.py` | Package init |
+| `job_market_analyzer/utils/salary_parser.py` | parse_salary_string() → SalaryParsed |
+| `job_market_analyzer/utils/text_processor.py` | tokenize(), compute_tfidf() |
+| `job_market_analyzer/utils/stat_helper.py` | normalize(), bin_values(), safe_percentile() |
+| `job_market_analyzer/io/__init__.py` | Package init |
+| `job_market_analyzer/io/base_adapter.py` | BaseAdapter abstract class |
+| `job_market_analyzer/io/demo_adapter.py` | DemoAdapter with statistical data generation |
+| `job_market_analyzer/io/importer.py` | CSV/JSON/SQLite importer |
+| `job_market_analyzer/analyzer/__init__.py` | Package init |
+| `job_market_analyzer/analyzer/salary_analyzer.py` | Salary distribution analysis |
+| `job_market_analyzer/analyzer/skill_analyzer.py` | Skill frequency + salary correlation |
+| `job_market_analyzer/analyzer/competitive_analyzer.py` | Competitive index calculation |
+| `job_market_analyzer/analyzer/strategy_advisor.py` | Job matching + action items |
+| `job_market_analyzer/analyzer/resume_matcher.py` | TF-IDF resume-job matching |
+| `job_market_analyzer/visualizer/__init__.py` | Package init |
+| `job_market_analyzer/visualizer/dashboard.py` | Plotly HTML dashboard + index page |
 | `scripts/run_analysis.py` | CLI entry point |
 | `tests/test_schema.py` | Schema tests |
 | `tests/test_salary_parser.py` | Salary parser tests |
@@ -51,7 +51,7 @@
 **Files:**
 - Create: `job_market_analyzer/pyproject.toml`
 - Create: `job_market_analyzer/config.yaml`
-- Create: `job_market_analyzer/src/__init__.py`
+- Create: `job_market_analyzer/job_market_analyzer/__init__.py`
 - Create: `job_market_analyzer/.gitignore`
 
 - [ ] **Step 1: Create pyproject.toml**
@@ -75,7 +75,6 @@ dependencies = [
     "numpy>=1.24",
     "plotly>=5.18",
     "scikit-learn>=1.3",
-    "jieba>=0.42",
 ]
 
 [project.optional-dependencies]
@@ -83,7 +82,7 @@ dev = ["pytest>=7.0", "ruff>=0.1"]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["src*"]
+include = ["job_market_analyzer*"]
 ```
 
 - [ ] **Step 2: Create config.yaml with defaults**
@@ -111,8 +110,7 @@ visualization:
   theme: "plotly_white"
   color_scale: "Viridis"
   chart_width: 1200
-  output_dir: "output/reports"
-  filename: "dashboard_{timestamp}.html"
+  output_dir: "output/reports"  # 固定输出 index.html 及各模块子页
 
 resume:
   user_skills: []
@@ -122,7 +120,7 @@ resume:
   target_salary: ""
 ```
 
-- [ ] **Step 3: Create .gitignore and src/__init__.py**
+- [ ] **Step 3: Create .gitignore and job_market_analyzer/__init__.py**
 
 `.gitignore`:
 ```
@@ -138,7 +136,7 @@ build/
 .pytest_cache/
 ```
 
-`src/__init__.py`:
+`job_market_analyzer/__init__.py`:
 ```python
 """job_market_analyzer — 招聘市场数据分析工具"""
 ```
@@ -146,14 +144,14 @@ build/
 - [ ] **Step 4: Create directory structure**
 
 ```bash
-mkdir -p src/utils src/io src/analyzer src/visualizer data/demo data/sample tests docs scripts
+mkdir -p job_market_analyzer/utils job_market_analyzer/io job_market_analyzer/analyzer job_market_analyzer/visualizer data/demo data/sample tests docs scripts
 ```
 
 - [ ] **Step 5: Install in dev mode and verify**
 
 ```bash
 pip install -e ".[dev]"
-python -c "import src; print('OK')"
+python -c "import job_market_analyzer; print('OK')"
 ```
 Expected: `OK`
 
@@ -169,8 +167,8 @@ git commit -m "feat: project scaffolding (pyproject.toml, config.yaml, directory
 ## Task 2: Salary Parser Utility
 
 **Files:**
-- Create: `src/utils/__init__.py`
-- Create: `src/utils/salary_parser.py`
+- Create: `job_market_analyzer/utils/__init__.py`
+- Create: `job_market_analyzer/utils/salary_parser.py`
 - Create: `tests/test_salary_parser.py`
 
 - [ ] **Step 1: Write the failing test**
@@ -178,7 +176,7 @@ git commit -m "feat: project scaffolding (pyproject.toml, config.yaml, directory
 ```python
 # tests/test_salary_parser.py
 import pytest
-from src.utils.salary_parser import parse_salary_string, SalaryParsed
+from job_market_analyzer.utils.salary_parser import parse_salary_string, SalaryParsed
 
 
 class TestParseSalary:
@@ -234,11 +232,11 @@ Expected: FAIL with `ModuleNotFoundError`
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/utils/__init__.py
+# job_market_analyzer/utils/__init__.py
 ```
 
 ```python
-# src/utils/salary_parser.py
+# job_market_analyzer/utils/salary_parser.py
 """薪资字符串解析器"""
 import re
 from dataclasses import dataclass
@@ -297,7 +295,7 @@ Expected: 7 passed
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/utils/ tests/test_salary_parser.py
+git add job_market_analyzer/utils/ tests/test_salary_parser.py
 git commit -m "feat: salary parser utility with test coverage"
 ```
 
@@ -306,7 +304,7 @@ git commit -m "feat: salary parser utility with test coverage"
 ## Task 3: Schema (JobItem + Report Models)
 
 **Files:**
-- Create: `src/schema.py`
+- Create: `job_market_analyzer/schema.py`
 - Create: `tests/test_schema.py`
 
 - [ ] **Step 1: Write the failing test**
@@ -314,7 +312,7 @@ git commit -m "feat: salary parser utility with test coverage"
 ```python
 # tests/test_schema.py
 import pytest
-from src.schema import JobItem, StrategyReport, JobMatch, SkillGap, ActionItem
+from job_market_analyzer.schema import JobItem, StrategyReport, JobMatch, SkillGap, ActionItem
 
 
 class TestJobItem:
@@ -397,10 +395,10 @@ Expected: FAIL with `ModuleNotFoundError`
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/schema.py
+# job_market_analyzer/schema.py
 """数据模型定义"""
-from pydantic import BaseModel, model_validator
-from src.utils.salary_parser import parse_salary_string
+from pydantic import BaseModel, Field, model_validator
+from job_market_analyzer.utils.salary_parser import parse_salary_string
 
 
 class JobItem(BaseModel):
@@ -419,7 +417,7 @@ class JobItem(BaseModel):
     salary_months: int | None = None
     experience: str = ""
     education: str = ""
-    skill_tags: list[str] = []
+    skill_tags: list[str] = Field(default_factory=list)
     job_description: str = ""
     job_url: str = ""
     crawl_time: str = ""
@@ -475,7 +473,7 @@ class StrategyReport(BaseModel):
 
 class UserProfile(BaseModel):
     """用户画像"""
-    user_skills: list[str] = []
+    user_skills: list[str] = Field(default_factory=list)
     user_experience: str = ""
     user_education: str = ""
     target_city: str = ""
@@ -496,7 +494,7 @@ Expected: 5 passed
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/schema.py tests/test_schema.py
+git add job_market_analyzer/schema.py tests/test_schema.py
 git commit -m "feat: JobItem + StrategyReport schemas with salary auto-parse"
 ```
 
@@ -505,7 +503,7 @@ git commit -m "feat: JobItem + StrategyReport schemas with salary auto-parse"
 ## Task 4: Config Loader
 
 **Files:**
-- Create: `src/config.py`
+- Create: `job_market_analyzer/config.py`
 - Create: `tests/test_config.py`
 
 - [ ] **Step 1: Write the failing test**
@@ -513,7 +511,7 @@ git commit -m "feat: JobItem + StrategyReport schemas with salary auto-parse"
 ```python
 # tests/test_config.py
 import pytest
-from src.config import Config
+from job_market_analyzer.config import Config
 
 
 class TestConfig:
@@ -554,7 +552,7 @@ Expected: FAIL with `ModuleNotFoundError`
 - [ ] **Step 3: Write implementation**
 
 ```python
-# src/config.py
+# job_market_analyzer/config.py
 """配置加载器：CLI > yaml > 默认值"""
 from pathlib import Path
 import yaml
@@ -588,7 +586,6 @@ _DEFAULTS = {
         "color_scale": "Viridis",
         "chart_width": 1200,
         "output_dir": "output/reports",
-        "filename": "dashboard_{timestamp}.html",
     },
     "resume": {
         "user_skills": [],
@@ -663,7 +660,7 @@ Expected: 4 passed
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/config.py tests/test_config.py
+git add job_market_analyzer/config.py tests/test_config.py
 git commit -m "feat: config loader with CLI > yaml > defaults priority"
 ```
 
@@ -672,7 +669,7 @@ git commit -m "feat: config loader with CLI > yaml > defaults priority"
 ## Task 5: Stat Helper Utility
 
 **Files:**
-- Create: `src/utils/stat_helper.py`
+- Create: `job_market_analyzer/utils/stat_helper.py`
 - Create: `tests/test_stat_helper.py`
 
 - [ ] **Step 1: Write the failing test**
@@ -681,7 +678,7 @@ git commit -m "feat: config loader with CLI > yaml > defaults priority"
 # tests/test_stat_helper.py
 import pytest
 import numpy as np
-from src.utils.stat_helper import normalize, bin_values, safe_percentile
+from job_market_analyzer.utils.stat_helper import normalize, bin_values, safe_percentile
 
 
 class TestNormalize:
@@ -729,7 +726,7 @@ Expected: FAIL with `ModuleNotFoundError`
 - [ ] **Step 3: Write implementation**
 
 ```python
-# src/utils/stat_helper.py
+# job_market_analyzer/utils/stat_helper.py
 """统计工具函数"""
 import numpy as np
 
@@ -770,7 +767,7 @@ Expected: 6 passed
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/utils/stat_helper.py tests/test_stat_helper.py
+git add job_market_analyzer/utils/stat_helper.py tests/test_stat_helper.py
 git commit -m "feat: stat helper (normalize, bin_values, safe_percentile)"
 ```
 
@@ -779,7 +776,7 @@ git commit -m "feat: stat helper (normalize, bin_values, safe_percentile)"
 ## Task 6: Text Processor Utility
 
 **Files:**
-- Create: `src/utils/text_processor.py`
+- Create: `job_market_analyzer/utils/text_processor.py`
 - Create: `tests/test_text_processor.py`
 
 - [ ] **Step 1: Write the failing test**
@@ -787,7 +784,7 @@ git commit -m "feat: stat helper (normalize, bin_values, safe_percentile)"
 ```python
 # tests/test_text_processor.py
 import pytest
-from src.utils.text_processor import tokenize, compute_tfidf_similarity
+from job_market_analyzer.utils.text_processor import tokenize, compute_tfidf_similarity
 
 
 class TestTokenize:
@@ -830,7 +827,7 @@ Expected: FAIL with `ModuleNotFoundError`
 - [ ] **Step 3: Write implementation**
 
 ```python
-# src/utils/text_processor.py
+# job_market_analyzer/utils/text_processor.py
 """文本预处理工具：分词 + TF-IDF"""
 import re
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -888,7 +885,7 @@ Expected: 5 passed
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/utils/text_processor.py tests/test_text_processor.py
+git add job_market_analyzer/utils/text_processor.py tests/test_text_processor.py
 git commit -m "feat: text processor (tokenize + TF-IDF similarity)"
 ```
 
@@ -897,9 +894,9 @@ git commit -m "feat: text processor (tokenize + TF-IDF similarity)"
 ## Task 7: BaseAdapter + DemoAdapter
 
 **Files:**
-- Create: `src/io/__init__.py`
-- Create: `src/io/base_adapter.py`
-- Create: `src/io/demo_adapter.py`
+- Create: `job_market_analyzer/io/__init__.py`
+- Create: `job_market_analyzer/io/base_adapter.py`
+- Create: `job_market_analyzer/io/demo_adapter.py`
 - Create: `tests/test_demo_adapter.py`
 
 - [ ] **Step 1: Write the failing test**
@@ -907,47 +904,47 @@ git commit -m "feat: text processor (tokenize + TF-IDF similarity)"
 ```python
 # tests/test_demo_adapter.py
 import pytest
-from src.io.demo_adapter import DemoAdapter
-from src.schema import JobItem
+from job_market_analyzer.io.demo_adapter import DemoAdapter
+from job_market_analyzer.schema import JobItem
 
 
 class TestDemoAdapter:
     def test_default_generation(self):
-        adapter = DemoAdapter()
+        adapter = DemoAdapter(seed=42)
         jobs = adapter.fetch_jobs(n_samples=100)
         assert len(jobs) == 100
         assert all(isinstance(j, JobItem) for j in jobs)
 
     def test_city_filter(self):
-        adapter = DemoAdapter()
+        adapter = DemoAdapter(seed=42)
         jobs = adapter.fetch_jobs(n_samples=50, city="北京")
         assert len(jobs) > 0
         assert all(j.city == "北京" for j in jobs)
 
     def test_salary_distribution(self):
         """北京薪资应该整体高于成都"""
-        adapter = DemoAdapter()
-        bj_jobs = adapter.fetch_jobs(n_samples=200, city="北京")
-        cd_jobs = adapter.fetch_jobs(n_samples=200, city="成都")
+        adapter = DemoAdapter(seed=42)
+        bj_jobs = adapter.fetch_jobs(n_samples=500, city="北京")
+        cd_jobs = adapter.fetch_jobs(n_samples=500, city="成都")
         bj_median = sum(j.salary_median for j in bj_jobs) / len(bj_jobs)
         cd_median = sum(j.salary_median for j in cd_jobs) / len(cd_jobs)
         assert bj_median > cd_median
 
     def test_max_generate_ratio_safety(self):
         """苛刻条件不会死循环"""
-        adapter = DemoAdapter()
+        adapter = DemoAdapter(seed=42)
         jobs = adapter.fetch_jobs(n_samples=500, city="北京", education="博士")
         # 可能不足500，但不会死循环
         assert len(jobs) > 0
 
     def test_skill_tags_not_empty(self):
-        adapter = DemoAdapter()
+        adapter = DemoAdapter(seed=42)
         jobs = adapter.fetch_jobs(n_samples=50)
         has_skills = any(len(j.skill_tags) > 0 for j in jobs)
         assert has_skills
 
     def test_job_description_not_empty(self):
-        adapter = DemoAdapter()
+        adapter = DemoAdapter(seed=42)
         jobs = adapter.fetch_jobs(n_samples=50)
         has_desc = any(len(j.job_description) > 0 for j in jobs)
         assert has_desc
@@ -963,14 +960,14 @@ Expected: FAIL with `ModuleNotFoundError`
 - [ ] **Step 3: Write BaseAdapter**
 
 ```python
-# src/io/__init__.py
+# job_market_analyzer/io/__init__.py
 ```
 
 ```python
-# src/io/base_adapter.py
+# job_market_analyzer/io/base_adapter.py
 """数据适配器抽象基类"""
 from abc import ABC, abstractmethod
-from src.schema import JobItem
+from job_market_analyzer.schema import JobItem
 
 
 class BaseAdapter(ABC):
@@ -985,15 +982,15 @@ class BaseAdapter(ABC):
 - [ ] **Step 4: Write DemoAdapter**
 
 ```python
-# src/io/demo_adapter.py
+# job_market_analyzer/io/demo_adapter.py
 """模拟数据生成器 — 生成符合真实招聘市场统计规律的演示数据"""
 import hashlib
 import random
 
 import numpy as np
 
-from src.io.base_adapter import BaseAdapter
-from src.schema import JobItem
+from job_market_analyzer.io.base_adapter import BaseAdapter
+from job_market_analyzer.schema import JobItem
 
 
 # 城市权重 + 薪资系数
@@ -1032,6 +1029,10 @@ class DemoAdapter(BaseAdapter):
 
     MAX_GENERATE_RATIO = 5
 
+    def __init__(self, seed: int | None = None):
+        """seed: 随机种子，传入则结果可复现（测试用）"""
+        self.seed = seed
+
     def fetch_jobs(
         self,
         n_samples: int = 500,
@@ -1040,6 +1041,9 @@ class DemoAdapter(BaseAdapter):
         education: str | None = None,
         experience: str | None = None,
     ) -> list[JobItem]:
+        if self.seed is not None:
+            random.seed(self.seed)
+            np.random.seed(self.seed)
         collected: list[JobItem] = []
         max_total = n_samples * self.MAX_GENERATE_RATIO
         batch_size = max(n_samples * 2, 200)
@@ -1061,9 +1065,10 @@ class DemoAdapter(BaseAdapter):
         return jobs
 
     def _generate_one(self) -> JobItem:
-        # 城市
-        city_name, city_coef = self._weighted_choice(list(_CITIES.items()), lambda x: x[1][0])
-        city_name = city_name  # type: ignore
+        # 城市（直接 random.choices 返回完整 tuple，避免 _weighted_choice 返回类型歧义）
+        city_items = list(_CITIES.items())
+        city_weights = [c[1][0] for c in city_items]
+        city_name, (_weight, city_coef) = random.choices(city_items, weights=city_weights, k=1)[0]
 
         # 薪资：对数正态分布
         base_salary = float(np.random.lognormal(mean=2.9, sigma=0.35))  # 中位数约18K
@@ -1172,7 +1177,7 @@ Expected: 6 passed
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/io/ tests/test_demo_adapter.py
+git add job_market_analyzer/io/ tests/test_demo_adapter.py
 git commit -m "feat: BaseAdapter + DemoAdapter with statistical data generation"
 ```
 
@@ -1181,7 +1186,7 @@ git commit -m "feat: BaseAdapter + DemoAdapter with statistical data generation"
 ## Task 8: Importer (CSV/JSON/SQLite)
 
 **Files:**
-- Create: `src/io/importer.py`
+- Create: `job_market_analyzer/io/importer.py`
 - Create: `tests/test_importer.py`
 
 - [ ] **Step 1: Write the failing test**
@@ -1193,8 +1198,8 @@ import csv
 import json
 import sqlite3
 from pathlib import Path
-from src.io.importer import import_csv, import_json, import_sqlite
-from src.schema import JobItem
+from job_market_analyzer.io.importer import import_csv, import_json, import_sqlite
+from job_market_analyzer.schema import JobItem
 
 
 class TestImportCSV:
@@ -1253,14 +1258,14 @@ Expected: FAIL with `ModuleNotFoundError`
 - [ ] **Step 3: Write implementation**
 
 ```python
-# src/io/importer.py
+# job_market_analyzer/io/importer.py
 """数据导入器：支持 CSV / JSON / SQLite"""
 import csv
 import json
 import sqlite3
 from pathlib import Path
 
-from src.schema import JobItem
+from job_market_analyzer.schema import JobItem
 
 
 def _row_to_jobitem(row: dict) -> JobItem:
@@ -1316,7 +1321,7 @@ Expected: 3 passed
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/io/importer.py tests/test_importer.py
+git add job_market_analyzer/io/importer.py tests/test_importer.py
 git commit -m "feat: CSV/JSON/SQLite importer"
 ```
 
@@ -1325,8 +1330,8 @@ git commit -m "feat: CSV/JSON/SQLite importer"
 ## Task 9: Salary Analyzer
 
 **Files:**
-- Create: `src/analyzer/__init__.py`
-- Create: `src/analyzer/salary_analyzer.py`
+- Create: `job_market_analyzer/analyzer/__init__.py`
+- Create: `job_market_analyzer/analyzer/salary_analyzer.py`
 - Create: `tests/test_salary_analyzer.py`
 
 - [ ] **Step 1: Write the failing test**
@@ -1334,14 +1339,14 @@ git commit -m "feat: CSV/JSON/SQLite importer"
 ```python
 # tests/test_salary_analyzer.py
 import pytest
-from src.analyzer.salary_analyzer import SalaryAnalyzer
-from src.io.demo_adapter import DemoAdapter
+from job_market_analyzer.analyzer.salary_analyzer import SalaryAnalyzer
+from job_market_analyzer.io.demo_adapter import DemoAdapter
 
 
 class TestSalaryAnalyzer:
     @pytest.fixture
     def jobs(self):
-        return DemoAdapter().fetch_jobs(n_samples=200)
+        return DemoAdapter(seed=42).fetch_jobs(n_samples=200)
 
     def test_distribution(self, jobs):
         analyzer = SalaryAnalyzer(jobs)
@@ -1388,16 +1393,16 @@ Expected: FAIL
 - [ ] **Step 3: Write implementation**
 
 ```python
-# src/analyzer/__init__.py
+# job_market_analyzer/analyzer/__init__.py
 ```
 
 ```python
-# src/analyzer/salary_analyzer.py
+# job_market_analyzer/analyzer/salary_analyzer.py
 """薪资分析模块"""
 from collections import defaultdict
 
-from src.schema import JobItem
-from src.utils.stat_helper import bin_values, safe_percentile
+from job_market_analyzer.schema import JobItem
+from job_market_analyzer.utils.stat_helper import bin_values, safe_percentile
 
 
 class SalaryAnalyzer:
@@ -1479,7 +1484,7 @@ Expected: 5 passed
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/analyzer/ tests/test_salary_analyzer.py
+git add job_market_analyzer/analyzer/ tests/test_salary_analyzer.py
 git commit -m "feat: salary analyzer (distribution, by_city, by_experience, by_education)"
 ```
 
@@ -1488,7 +1493,7 @@ git commit -m "feat: salary analyzer (distribution, by_city, by_experience, by_e
 ## Task 10: Skill Analyzer
 
 **Files:**
-- Create: `src/analyzer/skill_analyzer.py`
+- Create: `job_market_analyzer/analyzer/skill_analyzer.py`
 - Create: `tests/test_skill_analyzer.py`
 
 - [ ] **Step 1: Write the failing test**
@@ -1496,14 +1501,14 @@ git commit -m "feat: salary analyzer (distribution, by_city, by_experience, by_e
 ```python
 # tests/test_skill_analyzer.py
 import pytest
-from src.analyzer.skill_analyzer import SkillAnalyzer
-from src.io.demo_adapter import DemoAdapter
+from job_market_analyzer.analyzer.skill_analyzer import SkillAnalyzer
+from job_market_analyzer.io.demo_adapter import DemoAdapter
 
 
 class TestSkillAnalyzer:
     @pytest.fixture
     def jobs(self):
-        return DemoAdapter().fetch_jobs(n_samples=200)
+        return DemoAdapter(seed=42).fetch_jobs(n_samples=200)
 
     def test_frequency(self, jobs):
         analyzer = SkillAnalyzer(jobs)
@@ -1536,12 +1541,12 @@ Expected: FAIL
 - [ ] **Step 3: Write implementation**
 
 ```python
-# src/analyzer/skill_analyzer.py
+# job_market_analyzer/analyzer/skill_analyzer.py
 """技能分析模块"""
 from collections import Counter, defaultdict
 
-from src.schema import JobItem
-from src.utils.stat_helper import safe_percentile
+from job_market_analyzer.schema import JobItem
+from job_market_analyzer.utils.stat_helper import safe_percentile
 
 
 class SkillAnalyzer:
@@ -1566,22 +1571,23 @@ class SkillAnalyzer:
         }
 
     def salary_correlation(self) -> dict[str, dict]:
-        """技能-薪资关联分析"""
-        skill_salaries = defaultdict(list)
-        all_salaries = []
-        for job in self.jobs:
-            if job.salary_median is not None:
-                all_salaries.append(job.salary_median)
-                for skill in job.skill_tags:
-                    skill_salaries[skill].append(job.salary_median)
+        """技能-薪资关联分析（基于 job_id 差集，避免薪资值碰撞误剔除）"""
+        valid_jobs = [j for j in self.jobs if j.salary_median is not None]
+
+        skill_jobs: dict[str, list] = defaultdict(list)
+        for job in valid_jobs:
+            for skill in job.skill_tags:
+                skill_jobs[skill].append(job)
 
         result = {}
-        for skill, sals in skill_salaries.items():
-            without = [s for s in all_salaries if s not in sals]
+        for skill, jobs_with in skill_jobs.items():
+            with_sals = [j.salary_median for j in jobs_with]
+            with_ids = {j.job_id for j in jobs_with}
+            without_sals = [j.salary_median for j in valid_jobs if j.job_id not in with_ids]
             result[skill] = {
-                "with_skill": safe_percentile(sals, 50),
-                "without_skill": safe_percentile(without, 50) if without else None,
-                "count": len(sals),
+                "with_skill": safe_percentile(with_sals, 50),
+                "without_skill": safe_percentile(without_sals, 50) if without_sals else None,
+                "count": len(with_sals),
             }
         return result
 
@@ -1602,7 +1608,7 @@ Expected: 3 passed
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/analyzer/skill_analyzer.py tests/test_skill_analyzer.py
+git add job_market_analyzer/analyzer/skill_analyzer.py tests/test_skill_analyzer.py
 git commit -m "feat: skill analyzer (frequency, salary correlation, top_n)"
 ```
 
@@ -1611,7 +1617,7 @@ git commit -m "feat: skill analyzer (frequency, salary correlation, top_n)"
 ## Task 11: Competitive Analyzer
 
 **Files:**
-- Create: `src/analyzer/competitive_analyzer.py`
+- Create: `job_market_analyzer/analyzer/competitive_analyzer.py`
 - Create: `tests/test_competitive_analyzer.py`
 
 - [ ] **Step 1: Write the failing test**
@@ -1619,14 +1625,14 @@ git commit -m "feat: skill analyzer (frequency, salary correlation, top_n)"
 ```python
 # tests/test_competitive_analyzer.py
 import pytest
-from src.analyzer.competitive_analyzer import CompetitiveAnalyzer
-from src.io.demo_adapter import DemoAdapter
+from job_market_analyzer.analyzer.competitive_analyzer import CompetitiveAnalyzer
+from job_market_analyzer.io.demo_adapter import DemoAdapter
 
 
 class TestCompetitiveAnalyzer:
     @pytest.fixture
     def jobs(self):
-        return DemoAdapter().fetch_jobs(n_samples=300)
+        return DemoAdapter(seed=42).fetch_jobs(n_samples=300)
 
     def test_city_index(self, jobs):
         analyzer = CompetitiveAnalyzer(jobs)
@@ -1654,12 +1660,12 @@ Expected: FAIL
 - [ ] **Step 3: Write implementation**
 
 ```python
-# src/analyzer/competitive_analyzer.py
+# job_market_analyzer/analyzer/competitive_analyzer.py
 """竞争度分析模块"""
 from collections import defaultdict
 
-from src.schema import JobItem
-from src.utils.stat_helper import normalize, safe_percentile
+from job_market_analyzer.schema import JobItem
+from job_market_analyzer.utils.stat_helper import normalize, safe_percentile
 
 
 class CompetitiveAnalyzer:
@@ -1735,7 +1741,7 @@ Expected: 2 passed
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/analyzer/competitive_analyzer.py tests/test_competitive_analyzer.py
+git add job_market_analyzer/analyzer/competitive_analyzer.py tests/test_competitive_analyzer.py
 git commit -m "feat: competitive analyzer with weighted index formula"
 ```
 
@@ -1744,7 +1750,7 @@ git commit -m "feat: competitive analyzer with weighted index formula"
 ## Task 12: Resume Matcher
 
 **Files:**
-- Create: `src/analyzer/resume_matcher.py`
+- Create: `job_market_analyzer/analyzer/resume_matcher.py`
 - Create: `tests/test_resume_matcher.py`
 
 - [ ] **Step 1: Write the failing test**
@@ -1752,15 +1758,15 @@ git commit -m "feat: competitive analyzer with weighted index formula"
 ```python
 # tests/test_resume_matcher.py
 import pytest
-from src.analyzer.resume_matcher import ResumeMatcher
-from src.schema import JobItem, UserProfile
-from src.io.demo_adapter import DemoAdapter
+from job_market_analyzer.analyzer.resume_matcher import ResumeMatcher
+from job_market_analyzer.schema import JobItem, UserProfile
+from job_market_analyzer.io.demo_adapter import DemoAdapter
 
 
 class TestResumeMatcher:
     @pytest.fixture
     def jobs(self):
-        return DemoAdapter().fetch_jobs(n_samples=50)
+        return DemoAdapter(seed=42).fetch_jobs(n_samples=50)
 
     def test_match_score(self, jobs):
         profile = UserProfile(
@@ -1791,10 +1797,10 @@ Expected: FAIL
 - [ ] **Step 3: Write implementation**
 
 ```python
-# src/analyzer/resume_matcher.py
+# job_market_analyzer/analyzer/resume_matcher.py
 """简历-岗位匹配模块"""
-from src.schema import JobItem, UserProfile
-from src.utils.text_processor import compute_tfidf_similarity
+from job_market_analyzer.schema import JobItem, UserProfile
+from job_market_analyzer.utils.text_processor import compute_tfidf_similarity
 
 
 class ResumeMatcher:
@@ -1864,7 +1870,7 @@ Expected: 2 passed
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/analyzer/resume_matcher.py tests/test_resume_matcher.py
+git add job_market_analyzer/analyzer/resume_matcher.py tests/test_resume_matcher.py
 git commit -m "feat: resume matcher with skill + TF-IDF + experience scoring"
 ```
 
@@ -1873,7 +1879,7 @@ git commit -m "feat: resume matcher with skill + TF-IDF + experience scoring"
 ## Task 13: Strategy Advisor
 
 **Files:**
-- Create: `src/analyzer/strategy_advisor.py`
+- Create: `job_market_analyzer/analyzer/strategy_advisor.py`
 - Create: `tests/test_strategy_advisor.py`
 
 - [ ] **Step 1: Write the failing test**
@@ -1881,15 +1887,15 @@ git commit -m "feat: resume matcher with skill + TF-IDF + experience scoring"
 ```python
 # tests/test_strategy_advisor.py
 import pytest
-from src.analyzer.strategy_advisor import StrategyAdvisor
-from src.schema import UserProfile
-from src.io.demo_adapter import DemoAdapter
+from job_market_analyzer.analyzer.strategy_advisor import StrategyAdvisor
+from job_market_analyzer.schema import UserProfile
+from job_market_analyzer.io.demo_adapter import DemoAdapter
 
 
 class TestStrategyAdvisor:
     @pytest.fixture
     def jobs(self):
-        return DemoAdapter().fetch_jobs(n_samples=100)
+        return DemoAdapter(seed=42).fetch_jobs(n_samples=100)
 
     def test_generate_report(self, jobs):
         profile = UserProfile(
@@ -1923,11 +1929,11 @@ Expected: FAIL
 - [ ] **Step 3: Write implementation**
 
 ```python
-# src/analyzer/strategy_advisor.py
+# job_market_analyzer/analyzer/strategy_advisor.py
 """求职策略推荐模块"""
-from src.schema import JobItem, UserProfile, StrategyReport, JobMatch, SkillGap, ActionItem
-from src.analyzer.resume_matcher import ResumeMatcher
-from src.analyzer.skill_analyzer import SkillAnalyzer
+from job_market_analyzer.schema import JobItem, UserProfile, StrategyReport, JobMatch, SkillGap, ActionItem
+from job_market_analyzer.analyzer.resume_matcher import ResumeMatcher
+from job_market_analyzer.analyzer.skill_analyzer import SkillAnalyzer
 
 
 class StrategyAdvisor:
@@ -2004,7 +2010,7 @@ Expected: 2 passed
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/analyzer/strategy_advisor.py tests/test_strategy_advisor.py
+git add job_market_analyzer/analyzer/strategy_advisor.py tests/test_strategy_advisor.py
 git commit -m "feat: strategy advisor with TOP5 matching + skill gaps + action items"
 ```
 
@@ -2013,17 +2019,17 @@ git commit -m "feat: strategy advisor with TOP5 matching + skill gaps + action i
 ## Task 14: Dashboard Visualizer
 
 **Files:**
-- Create: `src/visualizer/__init__.py`
-- Create: `src/visualizer/dashboard.py`
+- Create: `job_market_analyzer/visualizer/__init__.py`
+- Create: `job_market_analyzer/visualizer/dashboard.py`
 
 - [ ] **Step 1: Write the dashboard generator**
 
 ```python
-# src/visualizer/__init__.py
+# job_market_analyzer/visualizer/__init__.py
 ```
 
 ```python
-# src/visualizer/dashboard.py
+# job_market_analyzer/visualizer/dashboard.py
 """Plotly HTML 看板生成器"""
 from datetime import datetime
 from pathlib import Path
@@ -2031,7 +2037,7 @@ from pathlib import Path
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from src.schema import JobItem, StrategyReport
+from job_market_analyzer.schema import JobItem, StrategyReport
 
 
 class DashboardGenerator:
@@ -2240,14 +2246,14 @@ frame.style.display = i === idx ? 'block' : 'none';
 - [ ] **Step 2: Verify it runs without import errors**
 
 ```bash
-python -c "from src.visualizer.dashboard import DashboardGenerator; print('OK')"
+python -c "from job_market_analyzer.visualizer.dashboard import DashboardGenerator; print('OK')"
 ```
 Expected: `OK`
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add src/visualizer/
+git add job_market_analyzer/visualizer/
 git commit -m "feat: Plotly dashboard generator with index page"
 ```
 
@@ -2270,15 +2276,15 @@ from pathlib import Path
 # 添加项目根目录到 path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.config import Config
-from src.schema import UserProfile
-from src.io.demo_adapter import DemoAdapter
-from src.io.importer import import_csv, import_sqlite
-from src.analyzer.salary_analyzer import SalaryAnalyzer
-from src.analyzer.skill_analyzer import SkillAnalyzer
-from src.analyzer.competitive_analyzer import CompetitiveAnalyzer
-from src.analyzer.strategy_advisor import StrategyAdvisor
-from src.visualizer.dashboard import DashboardGenerator
+from job_market_analyzer.config import Config
+from job_market_analyzer.schema import UserProfile
+from job_market_analyzer.io.demo_adapter import DemoAdapter
+from job_market_analyzer.io.importer import import_csv, import_sqlite
+from job_market_analyzer.analyzer.salary_analyzer import SalaryAnalyzer
+from job_market_analyzer.analyzer.skill_analyzer import SkillAnalyzer
+from job_market_analyzer.analyzer.competitive_analyzer import CompetitiveAnalyzer
+from job_market_analyzer.analyzer.strategy_advisor import StrategyAdvisor
+from job_market_analyzer.visualizer.dashboard import DashboardGenerator
 
 
 def load_data(cfg: Config) -> list:
@@ -2464,6 +2470,284 @@ Expected: Generates report with 5 modules
 ```bash
 git add -A
 git commit -m "feat: job_market_analyzer complete — 5 analysis modules + Plotly dashboard"
+```
+
+---
+
+## Task 17: 开源准备（Open Source Readiness）
+
+**目标:** 让项目具备推送到 GitHub 公开仓库的最小可开源集 —— 法律文件、门面文档、CI 质量信号、协作模板。
+
+**Files:**
+- Create: `LICENSE`
+- Create: `README.md`
+- Create: `DISCLAIMER.md`
+- Create: `CONTRIBUTING.md`
+- Create: `.github/workflows/ci.yml`
+- Create: `.github/ISSUE_TEMPLATE/bug_report.md`
+- Create: `.github/ISSUE_TEMPLATE/feature_request.md`
+- Create: `.github/ISSUE_TEMPLATE/adapter_request.md`
+- Create: `.github/PULL_REQUEST_TEMPLATE.md`
+- Update: `pyproject.toml`（补全元数据）
+
+- [ ] **Step 1: 创建 LICENSE（MIT）**
+
+```text
+MIT License
+
+Copyright (c) 2026 <your-name>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+- [ ] **Step 2: 创建 DISCLAIMER.md（免责声明，醒目）**
+
+```markdown
+# 免责声明 / Disclaimer
+
+## 中文
+
+1. **本项目不含任何可运行的爬虫代码**。主仓库仅提供招聘数据的分析、可视化能力。
+2. 数据获取通过 `BaseAdapter` 接口由用户自行实现，**用户需自行承担数据获取的合规与法律责任**。
+3. 内置 `DemoAdapter` 生成的全部数据均为合成数据，与任何真实公司、岗位无关。
+4. 请勿提交任何包含真实公司名、真实岗位 ID 的数据样本到本仓库（含 PR）。
+5. 本项目不对任何因使用或滥用本工具产生的法律后果承担责任。
+
+## English
+
+1. This project does NOT contain any runnable web scraping code.
+2. Data acquisition is implemented by users via the `BaseAdapter` interface. Users are solely responsible for the legality and compliance of their data sources.
+3. All data generated by the built-in `DemoAdapter` is synthetic and unrelated to any real company or job posting.
+4. Do NOT submit any real-world data (real company names, real job IDs) to this repository, including PRs.
+5. The authors assume no legal responsibility for any consequence arising from the use or misuse of this tool.
+```
+
+- [ ] **Step 3: 创建 README.md（门面）**
+
+```markdown
+# Job Market Analyzer
+
+> 招聘市场数据分析工具 —— 不爬数据，只做分析。
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
+[![CI](https://github.com/<your-org>/job-market-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/<your-org>/job-market-analyzer/actions/workflows/ci.yml)
+
+## 这是什么
+
+一个开源的招聘市场数据分析工具，生成薪资、技能、竞争度、求职策略多维度分析报告。通过 Adapter 接口接入你自己的数据（或使用内置模拟数据体验），输出交互式 Plotly HTML 看板。
+
+> ⚠️ 本项目不含爬虫。请阅读 [免责声明](DISCLAIMER.md)。
+
+## Quickstart
+
+```bash
+# 零配置启动（模拟数据，生成 3 模块报告）
+python scripts/run_analysis.py
+
+# 交互式输入个人画像，生成完整 5 模块报告
+python scripts/run_analysis.py --interactive
+
+# 指定数据源和个人画像
+python scripts/run_analysis.py --source csv --csv-path data/sample/jobs.csv \
+  --skills "Python,SQL" --city "成都" --experience "3-5年" --salary "18-25K"
+```
+
+打开生成的 `output/reports/index.html` 查看完整看板。
+
+## 功能
+
+- 薪资分析：分布 / 城市对比 / 经验曲线 / 学历对比
+- 技能分析：高频统计 / 技能-薪资关联
+- 竞争度分析：城市竞争指数（加权公式，可配置）
+- 求职策略：TOP5 匹配岗位 + 技能短板诊断 + 行动建议
+
+## 接入自己的数据
+
+继承 `BaseAdapter` 实现 `fetch_jobs()`，详见 [docs/adapter_dev.md](docs/adapter_dev.md)。
+
+## 开发
+
+```bash
+pip install -e ".[dev]"
+pytest tests/ -v
+```
+
+## License
+
+MIT — 见 [LICENSE](LICENSE)。
+```
+
+- [ ] **Step 4: 创建 CONTRIBUTING.md**
+
+```markdown
+# 贡献指南
+
+感谢你考虑为 Job Market Analyzer 贡献代码！
+
+## 重要约束
+
+- **不接受任何可运行的爬虫代码**。涉及数据获取的 PR 请以 `BaseAdapter` 子类示例形式提交到 `examples/`，且不包含针对特定网站的反爬逻辑。
+- **不接受真实数据**。测试数据必须使用 `DemoAdapter` 或合成 CSV，禁止提交含真实公司名/岗位 ID 的样本。
+- 遵循现有 TDD 流程：新功能先写测试，确保 `pytest tests/ -v` 全绿。
+
+## 开发流程
+
+1. Fork → 新建分支 `feat/xxx` 或 `fix/xxx`
+2. `pip install -e ".[dev]"`
+3. 改代码 + 写测试
+4. `ruff check . && pytest tests/ -v`
+5. 提交 PR，描述变更动机
+
+## 提交信息规范
+
+使用 Conventional Commits：`feat: ...` / `fix: ...` / `docs: ...` / `test: ...`
+```
+
+- [ ] **Step 5: 创建 CI workflow**
+
+`.github/workflows/ci.yml`:
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Lint
+        run: ruff check .
+      - name: Test
+        run: pytest tests/ -v
+```
+
+- [ ] **Step 6: 创建 Issue / PR 模板**
+
+`.github/ISSUE_TEMPLATE/bug_report.md`:
+
+```markdown
+---
+name: Bug 报告
+about: 报告缺陷
+---
+## 描述
+## 复现步骤
+1.
+## 期望行为
+## 实际行为
+## 环境（Python 版本 / OS / 数据源）
+```
+
+`.github/ISSUE_TEMPLATE/feature_request.md`:
+
+```markdown
+---
+name: 功能建议
+about: 提出新功能想法
+---
+## 想要解决什么问题
+## 建议的方案
+## 备选方案
+```
+
+`.github/ISSUE_TEMPLATE/adapter_request.md`:
+
+```markdown
+---
+name: Adapter 请求
+about: 请求支持某个数据源（如 Boss/拉勾/猎聘的 Adapter 模板）
+---
+## 数据源
+## 已知的数据结构
+## 注意：本项目不含爬虫，Adapter 仅提供数据接入规范
+```
+
+`.github/PULL_REQUEST_TEMPLATE.md`:
+
+```markdown
+## 变更说明
+## 变更类型
+- [ ] feat (新功能)
+- [ ] fix (缺陷修复)
+- [ ] docs (文档)
+- [ ] test (测试)
+- [ ] refactor (重构)
+
+## 检查清单
+- [ ] `pytest tests/ -v` 全绿
+- [ ] `ruff check .` 无警告
+- [ ] 未引入任何可运行爬虫代码
+- [ ] 未提交任何真实数据
+```
+
+- [ ] **Step 7: 补全 pyproject.toml 元数据**
+
+在 `[project]` 段补充：
+
+```toml
+authors = [{name = "<your-name>", email = "<your-email>"}]
+keywords = ["job-market", "recruitment", "data-analysis", "salary", "plotly"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business",
+    "Intended Audience :: Developers",
+]
+
+[project.urls]
+Homepage = "https://github.com/<your-org>/job-market-analyzer"
+Issues = "https://github.com/<your-org>/job-market-analyzer/issues"
+```
+
+- [ ] **Step 8: 验证本地 CI 流程可跑**
+
+```bash
+ruff check .
+pytest tests/ -v
+```
+Expected: 全绿
+
+- [ ] **Step 9: Commit**
+
+```bash
+git add LICENSE README.md DISCLAIMER.md CONTRIBUTING.md .github/ pyproject.toml
+git commit -m "docs: open source readiness (LICENSE, README, CI, templates)"
 ```
 
 ---
