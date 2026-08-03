@@ -37,7 +37,7 @@ python scripts/run_analysis.py --source csv --csv-path data/sample/jobs.csv \
 
 ## 接入自己的数据
 
-继承 `BaseAdapter` 实现 `fetch_jobs()`，详见 [docs/adapter_dev.md](docs/adapter_dev.md)。
+继承 `BaseAdapter` 实现 `fetch_jobs()`，参考 [base_adapter.py](job_market_analyzer/io/base_adapter.py) 源码。
 
 ## 开发
 
