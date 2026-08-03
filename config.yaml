@@ -1,0 +1,30 @@
+data:
+  source: "demo"
+  csv_path: "data/sample/jobs.csv"
+  sqlite_path: "data/jobs.db"
+
+analysis:
+  salary:
+    bins: [0, 10, 15, 20, 25, 30, 40, 50, 100]
+    percentiles: [25, 50, 75, 90]
+  skill:
+    min_frequency: 0.05
+    top_n: 20
+  competitive:
+    weights:
+      job_density: 0.4
+      salary_level: 0.3
+      education_relaxation: 0.3
+
+visualization:
+  theme: "plotly_white"
+  color_scale: "Viridis"
+  chart_width: 1200
+  output_dir: "output/reports"  # 固定输出 index.html 及各模块子页
+
+resume:
+  user_skills: []
+  user_experience: ""
+  user_education: ""
+  target_city: ""
+  target_salary: ""
