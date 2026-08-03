@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
-[![CI](https://github.com/my-username/job-market-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/my-username/job-market-analyzer/actions/workflows/ci.yml)
+[![CI](https://github.com/dasdwas17/job-market-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/dasdwas17/job-market-analyzer/actions/workflows/ci.yml)
 
 ## 解决什么问题
 
@@ -33,7 +33,7 @@ Job Market Analyzer 把"招聘数据 → 可读报告"这一段标准化：你�
 
 ```bash
 # 克隆仓库
-git clone https://github.com/my-username/job-market-analyzer.git
+git clone https://github.com/dasdwas17/job-market-analyzer.git
 cd job-market-analyzer
 
 # 安装（含开发依赖）

@@ -9,7 +9,7 @@ description = "招聘市场数据分析工具 — 薪资/技能/竞争度/求职
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.11"
-authors = [{name = "Li Ming", email = "12345678+my-username@users.noreply.github.com"}]
+authors = [{name = "Li Ming", email = "12345678+dasdwas17@users.noreply.github.com"}]
 keywords = ["job-market", "recruitment", "data-analysis", "salary", "plotly"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
@@ -29,8 +29,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/my-username/job-market-analyzer"
-Issues = "https://github.com/my-username/job-market-analyzer/issues"
+Homepage = "https://github.com/dasdwas17/job-market-analyzer"
+Issues = "https://github.com/dasdwas17/job-market-analyzer/issues"
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0", "ruff>=0.1"]
