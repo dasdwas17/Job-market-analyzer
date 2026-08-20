@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "job-market-analyzer"
-version = "0.1.0"
+version = "0.2.0"
 description = "招聘市场数据分析工具 — 薪资/技能/竞争度/求职策略分析"
 readme = "README.md"
 license = {text = "MIT"}
