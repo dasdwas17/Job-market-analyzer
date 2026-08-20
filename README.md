@@ -132,3 +132,54 @@ pytest tests/ -v
 ## License
 
 MIT — 见 [LICENSE](LICENSE)。
+
+## 版本历史 / Release Notes
+
+### v0.2.0 — Dashboard UI/UX Pro Max Enhancements
+
+**发布日期**：2026-08-20
+**Tag**：`v0.2.0` (commit `c40dfd3`)
+
+#### 🎨 What's New
+
+Dashboard 视觉与交互全面升级，基于 UI/UX Pro Max 设计规范。
+
+#### ✨ Highlights
+
+- **可访问性**：focus-visible 状态、aria-labels、语义化 HTML5 标签
+- **触摸优化**：导航按钮满足 44px 最小目标尺寸
+- **键盘导航**：左右箭头键切换 Tab 模块
+- **响应式**：移动端优先断点、`prefers-reduced-motion` 媒体查询
+- **性能**：iframe 懒加载、骨架屏 shimmer 动画
+- **视觉打磨**：SVG 图标、设计令牌精修、间距规范统一
+
+#### 📦 Changes
+
+- 1 file changed, 435 insertions(+), 112 deletions(-)
+- 修改文件：`job_market_analyzer/visualizer/dashboard.py`
+- **Full Changelog**: v0.1.0...v0.2.0
+
+---
+
+### v0.1.0 — Initial Release
+
+**Tag**：`v0.1.0`
+
+首个正式版本，包含完整的核心分析能力。
+
+---
+
+## 当前功能清单（v0.2.0）
+
+| 模块 | 功能 | 输出 |
+|------|------|------|
+| 数据导入 | CSV / JSON / SQLite / 自定义 Adapter | JobItem 列表 |
+| 模拟数据 | DemoAdapter（500 条合成数据，可设种子） | 无需输入即可体验 |
+| 薪资分析 | 分布直方图、城市/经验/学历分组中位数、p25/p50/p75/p90 分位 | `salary.html` |
+| 技能分析 | 高频技能 Top N、技能-薪资关联（job_id 集合运算） | `skill.html` |
+| 竞争度分析 | 城市竞争指数（0-100，加权公式可配） | `competitive.html` |
+| 求职策略 | TOP5 匹配岗位、技能短板诊断、优先级行动建议 | `strategy.html` |
+| 简历匹配 | 技能 + TF-IDF + 经验综合评分 | 报告数据 |
+| 可视化看板 | 交互式 HTML 看板，索引页 + 4 模块子页 | `index.html` |
+| CLI 入口 | 零配置启动 / 交互式 / 配置文件三种模式 | `run_analysis.py` |
+| 可访问性 | 键盘导航、ARIA、触摸目标、reduced-motion | v0.2.0 新增 |。
